@@ -1,0 +1,1 @@
+./datasets/shuangliu/vlcsnap-2021-01-26-23h02m21s148.png 925,542,1203,677,0
