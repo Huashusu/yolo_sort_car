@@ -154,12 +154,15 @@ class YOLO(object):
 
         # add ruben
         anns = []
+        label_text = {}
         for i, c in enumerate(top_label):
             # print('top_label',top_label)
             predicted_class = self.class_names[c]
             print(i, c, predicted_class)
-            if predicted_class != 'car' and predicted_class != 'bus':
-                continue
+            label_text[i] = predicted_class
+            # 跳过识别的莫模型
+            # if predicted_class != 'car' and predicted_class != 'bus':
+            #     continue
             score = top_conf[i]
 
             top, left, bottom, right = boxes[i]
@@ -172,29 +175,6 @@ class YOLO(object):
             left = max(0, np.floor(left + 0.5).astype('int32'))
             bottom = min(np.shape(image)[0], np.floor(bottom + 0.5).astype('int32'))
             right = min(np.shape(image)[1], np.floor(right + 0.5).astype('int32'))
-
-            # 画框框
-            # label = '{} {:.2f}'.format(predicted_class, score)
-            # label = '{}'.format(predicted_class)
-            # draw = ImageDraw.Draw(image)
-            # label_size = draw.textsize(label, font)
-            # label = label.encode('utf-8')
-            # print(label)
-
-            # if top - label_size[1] >= 0:
-            #     text_origin = np.array([right, bottom - label_size[1]])
-            # else:
-            #     text_origin = np.array([right, bottom + 1])
-            # print(top,left,bottom,right,predicted_class)
-            # for i in range(thickness):
-            #     draw.rectangle(
-            #         [left + i, top + i, right - i, bottom - i],
-            #         outline=(255,255,255))
-            # draw.rectangle(
-            #     [tuple(text_origin), tuple(text_origin + label_size)],\
-            #     fill=(0,255,255))
-            # draw.text(text_origin, str(label,'UTF-8'), fill=(0,0,0), font=font)
-
             anns.append([top, left, bottom, right, score])
             # del draw
         track_bbs_ids = mot_tracker.update(np.array(anns))
@@ -202,7 +182,7 @@ class YOLO(object):
             # 画框框
             # label = '{} {:.2f}'.format(predicted_class, score)
             top, left, bottom, right, id = box[0], box[1], box[2], box[3], box[4],
-            label = '车辆' + str(int(id))
+            label = label_text[int(id)-1] + str(int(id))
             draw = ImageDraw.Draw(image)
             label_size = draw.textsize(label, font)
             label = label.encode('utf-8')
@@ -218,7 +198,7 @@ class YOLO(object):
                     [left + i, top + i, right - i, bottom - i],
                     outline=self.colors[int(id) % 20])
             draw.rectangle(
-                [tuple(text_origin), tuple(text_origin + label_size)], \
+                [tuple(text_origin), tuple(text_origin + label_size)],
                 fill=self.colors[int(id) % 20])
             draw.text(text_origin, str(label, 'UTF-8'), fill=(0, 0, 0), font=font)
         return image, anns
